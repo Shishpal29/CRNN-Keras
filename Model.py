@@ -5,6 +5,7 @@ from keras.layers import Reshape, Lambda, BatchNormalization
 from keras.layers.merge import add, concatenate
 from keras.models import Model
 from keras.layers.recurrent import LSTM
+from keras.layers import Bidirectional
 from parameter import *
 K.set_learning_phase(0)
 
@@ -59,20 +60,16 @@ def get_Model(training):
     inner = Dense(64, activation='relu', kernel_initializer='he_normal', name='dense1')(inner)  # (None, 32, 64)
 
     # RNN layer
-    lstm_1 = LSTM(256, return_sequences=True, kernel_initializer='he_normal', name='lstm1')(inner)  # (None, 32, 512)
-    lstm_1b = LSTM(256, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='lstm1_b')(inner)
-    lstm1_merged = add([lstm_1, lstm_1b])  # (None, 32, 512)
-    lstm1_merged = BatchNormalization()(lstm1_merged)
-    lstm_2 = LSTM(256, return_sequences=True, kernel_initializer='he_normal', name='lstm2')(lstm1_merged)
-    lstm_2b = LSTM(256, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='lstm2_b')(lstm1_merged)
-    lstm2_merged = concatenate([lstm_2, lstm_2b])  # (None, 32, 1024)
-    lstm_merged = BatchNormalization()(lstm2_merged)
+    lstm_1 = Bidirectional(LSTM(256, return_sequences=True, kernel_initializer='he_normal', name='lstm1'))(inner)  # (None, 32, 512)
+    lstm_1 = BatchNormalization()(lstm_1)
+    lstm_2 = Bidirectional(LSTM(256, return_sequences=True, kernel_initializer='he_normal', name='lstm2'))(lstm_1)
+    lstm_2 = BatchNormalization()(lstm_2)
 
     # transforms RNN output to character activations:
-    inner = Dense(num_classes, kernel_initializer='he_normal',name='dense2')(lstm2_merged) #(None, 32, 63)
+    inner = Dense(num_classes, kernel_initializer='he_normal',name='dense2')(lstm_2) #(None, 32, 42)
     y_pred = Activation('softmax', name='softmax')(inner)
 
-    labels = Input(name='the_labels', shape=[max_text_len], dtype='float32') # (None ,8)
+    labels = Input(name='the_labels', shape=[max_text_len], dtype='float32') # (None ,9)
     input_length = Input(name='input_length', shape=[1], dtype='int64')     # (None, 1)
     label_length = Input(name='label_length', shape=[1], dtype='int64')     # (None, 1)
 
@@ -84,5 +81,3 @@ def get_Model(training):
         return Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out)
     else:
         return Model(inputs=[inputs], outputs=y_pred)
-
-
