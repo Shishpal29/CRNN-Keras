@@ -73,9 +73,9 @@ GPU : GeForce GTX 1080 (8GB)
 
 Python : 3.5.2
 
-Tensorflow : 1.5.0
+Tensorflow : 1.12.0
 
-Keras : 2.1.3
+Keras : 2.2.4
 
 CUDA, CUDNN : 9.0, 7.0
 
