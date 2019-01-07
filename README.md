@@ -67,7 +67,7 @@ After creating training data in this way, put it in 'DB/train' directory and run
 
 ## File Description
 
-os : Ubuntu 16.04.4 LTS
+os : CentOS 7
 
 GPU : GeForce GTX 1080 (8GB)
 
